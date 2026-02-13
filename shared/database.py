@@ -10,10 +10,8 @@ def get_connection():
     return sqlite3.connect(DB_PATH)
 
 def init_db():
-    """Initialize the SQLite database with the new schema."""
     with get_connection() as conn:
         cursor = conn.cursor()
-        # Dropping table to allow schema update since we are in dev/prototype phase
         cursor.execute("DROP TABLE IF EXISTS api_keys") 
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS api_keys (
@@ -25,13 +23,9 @@ def init_db():
             )
         ''')
         conn.commit()
-    print(f"Database initialized at {DB_PATH}")
 
 def create_key(key_string: str, owner_name: str, ttl_hours: int = 3):
-    """Create a new API key with expiration."""
-    # Calculate expiration time in Python to ensure ISO format compatibility
     expires_at = datetime.utcnow() + timedelta(hours=ttl_hours)
-    
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -42,10 +36,6 @@ def create_key(key_string: str, owner_name: str, ttl_hours: int = 3):
     print(f"Key created for {owner_name}: {key_string} (Expires: {expires_at})")
 
 def validate_key(key_string: str) -> bool:
-    """
-    Check if the key exists, is active, and has not expired.
-    Returns: True if valid, False otherwise.
-    """
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -76,14 +66,12 @@ def validate_key(key_string: str) -> bool:
         return True
 
 def delete_expired_keys():
-    """Delete keys that have passed their expiration time."""
     now = datetime.utcnow()
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('DELETE FROM api_keys WHERE expires_at < ?', (now,))
         deleted_count = cursor.rowcount
         conn.commit()
-    print(f"Deleted {deleted_count} expired keys.")
 
 if __name__ == "__main__":
     init_db()
