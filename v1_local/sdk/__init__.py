@@ -6,13 +6,9 @@ class KryptonClient:
     The official SDK for interacting with a Krypton AI Gateway.
     """
     def __init__(self, base_url: str = "http://127.0.0.1:8000"):
-        # Remove trailing slashes for consistency
         self.base_url = base_url.rstrip("/")
 
     def generate(self, prompt: str, model: str = "llama3", max_tokens: int = 100, temperature: float = 0.7) -> str:
-        """
-        Send a prompt to the Krypton Gateway for LLM generation.
-        """
         payload = {
             "prompt": prompt,
             "model": model,
@@ -24,7 +20,7 @@ class KryptonClient:
             response = httpx.post(
                 f"{self.base_url}/generate",
                 json=payload,
-                timeout=120.0 # Generation might take a while depending on queue/hardware
+                timeout=120.0
             )
             response.raise_for_status()
             return response.json().get("response", "")
