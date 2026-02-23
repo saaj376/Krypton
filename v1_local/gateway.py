@@ -10,7 +10,7 @@ from fastapi.security import APIKeyHeader
 from pydantic import BaseModel
 import httpx
 
-from shared.auth import verify_access
+from shared.auth import verify_access, issue_key
 
 app = FastAPI()
 
@@ -26,15 +26,37 @@ class GenerateRequest(BaseModel):
     max_tokens: int | None = 100
     temperature: float | None = 0.7
 
+class KeyRequest(BaseModel):
+    name: str
+    ttl_hours: int = 3
+
 async def check_api_key(api_key: str = Security(api_key_header)):
     """Dependency to validate the API key."""
-    if not verify_access(api_key):  
+    if not verify_access(api_key):
         raise HTTPException(status_code=403, detail="Invalid or expired API Key")
     return api_key
 
 @app.get("/")
 async def root():
     return {"message": "Krypton v1 Local Gateway Running"}
+
+@app.post("/request-key")
+async def request_key(request: KeyRequest):
+    """
+    Public endpoint for friends to request an API key.
+    Only successful if the local Ollama instance is currently running.
+    """
+    try:
+        # Check if Ollama is running
+        async with httpx.AsyncClient() as client:
+            response = await client.get("http://localhost:11434/", timeout=3.0)
+            response.raise_for_status()
+    except (httpx.RequestError, httpx.HTTPStatusError):
+        raise HTTPException(status_code=503, detail="Ollama is currently offline. Key requests are disabled.")
+
+    # Generate and store the key in the database
+    key = issue_key(owner_name=request.name, ttl_hours=request.ttl_hours)
+    return {"message": "Key successfully generated", "key": key, "expires_in_hours": request.ttl_hours}
 
 @app.post("/generate")
 async def generate(request: GenerateRequest, api_key: str = Security(check_api_key)):
