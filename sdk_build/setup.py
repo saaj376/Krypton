@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="krypton-sdk",  # Name of the package
-    version="0.1.0",
+    version="0.1.1",
     description="A lightweight SDK to connect to a Krypton AI Gateway over the internet.",
     author="Saajan",
     author_email="saajan.varghese.2006@gmail.com",
