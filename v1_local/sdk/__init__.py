@@ -37,7 +37,7 @@ Usage:
     from krypton_sdk import KryptonClient
     
     # 1. Connect to your friend's server
-    client = KryptonClient(base_url="https://their-public-url.ngrok-free.app")
+    client = KryptonClient(base_url="https://staminal-susann-inimitably.ngrok-free.dev")
     
     # 2. Generate text! (The server safely limits GPU concurrency)
     response = client.generate("Write a haiku about a GPU.")
