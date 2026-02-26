@@ -9,10 +9,11 @@ from shared.database import init_db, create_key, validate_key, delete_expired_ke
 
 class TestDatabase(unittest.TestCase):
 
-    def test_key_lifecycle(self):
-        # 1. Initialize
+    def setUp(self):
+        # 1. Initialize logic before EACH test
         init_db()
 
+    def test_key_lifecycle_and_persistence(self):
         # 2. Create a valid key (3 hours)
         key_valid = "valid-key-123"
         create_key(key_valid, "Tester A", ttl_hours=3)
@@ -42,8 +43,7 @@ class TestDatabase(unittest.TestCase):
             f"Expected remaining keys to be ['{key_valid}'], got {keys!r}",
         )
 
-    def test_database_persistence(self):
-        # Re-connect to ensure data is still there
+        # 7. Persistence Test - Re-connect to ensure data is still there
         with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT count(*) FROM api_keys")
