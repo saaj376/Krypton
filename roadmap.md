@@ -1,63 +1,55 @@
-Phase 1: Handling "Server Offline" Requests
-When your server is completely off, the Python SDK cannot talk to SQLite. We still need a way for the user to ping you.
+Here is exactly how you can implement this robust, production-level system completely internally, without any external webhooks like Formspree.
 
-SDK Webhook: Update the 
+To achieve the "server is off but users can still request access" goal natively, you must decouple the system into two separate parts:
 
-KryptonClient
- SDK. If it tries to reach your ngrok URL and fails (ConnectionRefusedError), it automatically sends an HTTP request to a free Formspree/EmailJS webhook.
-Alert the Owner: This webhook sends an email to you: "User [their_email] is requesting access, but the server is offline."
-Notify the User: The SDK prints to their console: "The Krypton Server is currently offline. The owner has been notified of your request. You will receive an email once the server is online and you are approved."
-Phase 2: Updating the SQLite Database (
+A tiny, always-on ping server (e.g., deployed on a free tier like Render/Vercel) that ONLY handles incoming requests and emails when your main GPU server is off.
+Your local GPU Gateway (v1_local) that does the heavy lifting, manages the queue, and talks to the SQL database when you turn it on.
+Here is the straightforward roadmap.
 
-shared/database.py
-)
-We need to track "pending" requests that are waiting for your manual approval.
+Part 1: The "Always On" Ping Server (Cloud)
+Since your home machine is turned off, the SDK must have an endpoint to talk to on the public internet. We build a micro app just for this.
 
-Update api_keys Table: Make sure this table currently maps key_string to user_email and an expires_at timestamp.
-Create pending_requests Table: Add a new table with columns:
-email (TEXT PRIMARY KEY)
-requested_at (TIMESTAMP)
-status (TEXT) - e.g., 'waiting', 'approved'
-Phase 3: The Request Queue System (
-
-v1_local/gateway.py
-)
-When you turn your server ON (using 
+Create ping_server/main.py: Write a tiny FastAPI app. It needs only one endpoint: POST /request-access.
+Handling Requests: When the SDK hits this endpoint with an email address, the ping server does two things using standard Python smtplib (with a Gmail App Password):
+Emails You (The Owner): "Alert: User {email} is waiting. Please start the Krypton GPU Server locally!"
+Emails the User: "Your request has been received. The owner is starting the server. You will be emailed your API key shortly."
+Deploy the Ping Server: Deploy this extremely lightweight directory to a free host like Render.com or Railway.app. It uses almost zero resources and never interacts with a database or a GPU.
+Part 2: The Local GPU Gateway (v1_local)
+When you get the email, you run 
 
 start_krypton.sh
-), it now listens for access requests.
+. Now your local machine takes over all duties.
 
-Create /request-access Endpoint:
-The user runs the SDK, which hits this endpoint with their email.
-The gateway inserts their email into the SQLite pending_requests table with status waiting.
-It returns a message to the SDK: "Your request has been added to the queue! You will receive an API key via email once the owner approves it."
-Send "Waitlist" Email (Optional but polite): The server automatically sends a quick email to the user: "You are officially on the waitlist for the Krypton Server. The owner will review your request shortly."
-Phase 4: The Owner Approval System (Terminal / Local Script)
-You need a way to review who is waiting and click "Approve." Since you manage this server from your terminal, we can build a simple command-line interface (CLI) just for you.
+Database Update (
 
-Create approve.py script: Write a small script in the project root.
-List Pending Users: When you run python approve.py, it queries the pending_requests table and prints a numbered list of emails waiting for access. It also shows count_active_keys().
-Manual Approval Logic:
-You type a number to approve a user (e.g., approve 1).
-Wait! The script checks the api_keys table.
-If there are 2 active keys: It blocks you and says: "Cannot approve. Server is at maximum capacity (2 active users). Please wait for a key to expire."
-If there are < 2 active keys:
-Generates a new API key using 
+krypton.db
+):
+Ensure api_keys handles active users and expires_at.
+Create a new waitlist table (email, requested_at).
+Create the Local /join-queue Endpoint:
+SDKs should hit this endpoint when the server is ON.
+If there are < 2 active API keys in the DB: Generate a key, save it to api_keys, and return it directly to the user's SDK.
+If there are == 2 active API keys: Save their email to the waitlist table. Send them an email: "The Krypton Server is currently at max capacity. You are on the waitlist."
+The Background Expiration Loop (The Enforcer):
+Inside your FastAPI app, create an asyncio.create_task that runs every 60 seconds.
+Check Expirations: It checks api_keys for expires_at < current_time.
+If a key expired:
+Print to your local terminal: [ALERT] API Key for {email} has expired! Removing.
+Delete the key from the DB.
+Email the expired user: "Your 3-hour session on Krypton has ended."
+Promote from Waitlist:
+Check the waitlist table. If it's not empty, pop the oldest email.
+Generate a new API key for that user.
+Email the promoted user: "The server is free! Your turn. Here is your API key: {key} (Valid for 3 hours)."
+Part 3: The SDK (krypton_sdk)
+The Python client needs to be smart enough to know which server to talk to.
 
-create_key(email)
-.
-Emails the user: "Your API key is [key]! It is valid for exactly 3 hours."
-Deletes them from the pending_requests table.
-Phase 5: The Automated Expiration Engine
-You don't want to manually kick people off; the server should do this automatically.
+The Handshake Logic:
+When the user runs client.generate("hello"), the SDK first tries to ping your local gateway (via your ngrok URL).
+If successful: It proceeds normally, passing its API key, or requesting one from the local queue.
+If it fails (Connection Error): The SDK catches the exception. It knows your home computer is OFF. It then automatically sends a POST request to your cloud ping_server/request-access to wake you up. It prints a friendly message to the user's terminal to wait for an email.
+Why this is the correct production architecture:
 
-The "Tick" Task: Add a background task (asyncio.create_task) inside 
-
-gateway.py
- that runs every 60 seconds while the server is on.
-Check the Clock: It queries SQLite for any keys where expires_at < now.
-Handle Expiration:
-It deletes the expired key from the api_keys database.
-It prints loudly to your terminal: [EXPIRED] The API Key for user {email} has expired!
-It sends a final email to that user: "Your 3-hour access to Krypton Server has expired. If you need more time, please request a new key."
-It prints to your terminal: [QUEUE] A slot is now open! Run 'python approve.py' to let the next person in.
+No Third-Party Webhook Providers: You control the ping server code 100%. It is just standard Python FastAPI.
+Separation of Concerns: The ping server handles offline notifications; the local GPU handles the heavy database and generation tasks.
+Fully Automated Flow: Once you run the bash script, the 60-second background task manages the 2-user limit, the 3-hour expiration, the waitlist promotion, and all terminal/email notifications automatically.
