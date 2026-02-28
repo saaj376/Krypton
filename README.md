@@ -1,31 +1,26 @@
-# Krypton
-Krypton is a production-grade LLM gateway for local Llama 3 hosting. It turns an RTX 3050 into a private cloud using a custom SDK, and async semaphores to prevent GPU crashes. It's the ultimate hackathon tool for unlimited, safe AI access.
+# Krypton AI Gateway
 
-# Krypton Client Setup
+Krypton is a production-grade LLM gateway designed for local GPU hosting. It seamlessly turns any consumer-grade GPU (like an RTX 3050) into a robust, queue-managed private cloud using a custom async Python SDK.
 
-Welcome to the Krypton network! To connect to a friend's RTX 3050 LLM Gateway, follow these simple steps.
+It is the ultimate tool for unlimited, safe, and metered generative AI access!
 
-## Option 1: Using the Krypton SDK (Python)
+---
 
-If you use Python, simply copy the `v1_local/sdk/__init__.py` file into your project (name the folder `krypton_sdk`).
+## 🛠️ System Architecture
 
-```python
-from krypton_sdk import KryptonClient
+Krypton is uniquely designed into three "Smart" modular phases that gracefully protect your machine while maintaining a professional SaaS-like experience for your developers:
 
-# 1. Connect to your friend's gateway URL (they should provide an ngrok link)
-client = KryptonClient(base_url="https://staminal-susann-inimitably.ngrok-free.dev")
+1. **The Cloud Sentinel (`ping_server`)**: A completely free, zero-maintenance Render cloud app that uses Google App Passwords to securely alert you whenever a developer requests API access while your machine is asleep.
+2. **The Local Enforcer (`v1_local/gateway.py`)**: A fully self-managing queue system hosted locally. It actively monitors your GPU limit exactly 2 concurrent active users to prevent memory thrashing. It automatically deletes session keys after 3 hours and proactively emails the next waitlisted developer that their slot on the GPU is ready. 
+3. **The Smart Broker SDK (`krypton_sdk v0.2.0`)**: A polished PyPI Python package for developers. It natively parses endpoints, injects API key headers, and boasts incredible offline fallback routing logic to wake you up without crashing their app.
 
-# 2. Use the LLM!
-response = client.generate("Why is the sky blue?", model="llama3")
-print(response)
-```
+---
 
-## Option 2: Using simple cURL
+## 🚀 How to use it?
 
-You don't need any special tools. Just HTTP:
+If you are a developer looking to connect to a friend's Krypton server using the `krypton-sdk` Python package, **[please read the detailed USAGE.md guide here!](USAGE.md)**
 
-```bash
-curl -X POST https://staminal-susann-inimitably.ngrok-free.dev/generate \
-     -H "Content-Type: application/json" \
-     -d '{"prompt": "Write a poem about GPUs"}'
-```
+If you are the **Gateway Owner** and want to run your own server:
+1. Copy the `.env.example` to `.env` and fill in your Gmail App Password.
+2. Deploy the `ping_server` folder to Render forever.
+3. Run `source start_krypton.sh` when you're ready to share your GPU!
