@@ -1,4 +1,4 @@
-# 🚀 Krypton SDK — Developer Guide
+# Krypton SDK — Developer Guide
 
 The `krypton-sdk` is the official Python client library for the **Krypton AI Gateway**. It gives you a clean, high-level interface to a privately hosted LLM (powered by [Ollama](https://ollama.com/)) running on someone else's GPU. The SDK handles API key negotiation, request queuing, token streaming, and automatic offline fallback transparently so you can focus on building.
 
@@ -94,9 +94,9 @@ Creates and configures a new SDK client instance.
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `email` | `str` | ✅ | Your email address. Used to receive your API key and waitlist notifications. |
-| `base_url` | `str` | ✅ | Full HTTPS URL of the Krypton Gateway (no trailing slash). Example: `"https://abc123.ngrok-free.app"` |
-| `api_key` | `str` | ❌ | An existing, unexpired API key (`kr_...`). If provided, you can skip `join_queue()` and call `generate()` immediately. Defaults to `None`. |
+| `email` | `str` | Yes | Your email address. Used to receive your API key and waitlist notifications. |
+| `base_url` | `str` | Yes | Full HTTPS URL of the Krypton Gateway (no trailing slash). Example: `"https://abc123.ngrok-free.app"` |
+| `api_key` | `str` | No | An existing, unexpired API key (`kr_...`). If provided, you can skip `join_queue()` and call `generate()` immediately. Defaults to `None`. |
 
 **Raises:** `ValueError` if either `email` or `base_url` is empty or `None`.
 
