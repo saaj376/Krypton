@@ -10,7 +10,7 @@ class KryptonClient:
         self.email = email
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
-        self.ping_server_url = "https://krypton-ping.onrender.com/request-access"
+        self.ping_server_url = "https://krypton-pl4h.onrender.com/request-access"
 
     def _notify_offline_server(self):
         print("\n[Krypton] Central GPU Server is offline! Notifying the owner to start it...")
