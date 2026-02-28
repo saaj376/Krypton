@@ -1,4 +1,4 @@
-# 🔮 Krypton AI Gateway
+# Krypton AI Gateway
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
@@ -12,31 +12,31 @@ Krypton is a production-grade LLM gateway designed for local GPU hosting. It sea
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [Why Krypton?](#-why-krypton)
-- [System Architecture](#️-system-architecture)
-- [Directory Structure](#-directory-structure)
-- [Prerequisites](#-prerequisites)
-- [Installation & Setup](#-installation--setup)
+- [Why Krypton?](#why-krypton)
+- [System Architecture](#system-architecture)
+- [Directory Structure](#directory-structure)
+- [Prerequisites](#prerequisites)
+- [Installation & Setup](#installation--setup)
   - [1. Clone & Python environment](#1-clone--python-environment)
   - [2. Configure environment variables](#2-configure-environment-variables)
   - [3. Deploy the Cloud Sentinel (ping_server)](#3-deploy-the-cloud-sentinel-ping_server)
   - [4. Start the local gateway](#4-start-the-local-gateway)
-- [API Reference](#-api-reference)
-- [Developer Guide — Using the SDK](#-developer-guide--using-the-sdk)
+- [API Reference](#api-reference)
+- [Developer Guide — Using the SDK](#developer-guide--using-the-sdk)
   - [Installation](#installation)
   - [Quick Start](#quick-start)
   - [Streaming responses](#streaming-responses)
   - [Reusing an existing API key](#reusing-an-existing-api-key)
-- [v2 — Google Colab Variant](#-v2--google-colab-variant)
-- [Running Tests](#-running-tests)
-- [Contributing](#-contributing)
-- [License](#-license)
+- [v2 — Google Colab Variant](#v2--google-colab-variant)
+- [Running Tests](#running-tests)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
-## 💡 Why Krypton?
+## Why Krypton?
 
 | Problem | Krypton's solution |
 |---|---|
@@ -48,7 +48,7 @@ Krypton is a production-grade LLM gateway designed for local GPU hosting. It sea
 
 ---
 
-## 🛠️ System Architecture
+## System Architecture
 
 Krypton is composed of three independent, loosely-coupled components:
 
@@ -95,7 +95,7 @@ Krypton is composed of three independent, loosely-coupled components:
 
 ---
 
-## 📁 Directory Structure
+## Directory Structure
 
 ```
 Krypton/
@@ -134,7 +134,7 @@ Krypton/
 
 ---
 
-## ✅ Prerequisites
+## Prerequisites
 
 ### Gateway Owner (running the server)
 
@@ -157,7 +157,7 @@ Krypton/
 
 ---
 
-## ⚙️ Installation & Setup
+## Installation & Setup
 
 ### 1. Clone & Python environment
 
@@ -235,7 +235,7 @@ ngrok http 8000
 
 ---
 
-## 📡 API Reference
+## API Reference
 
 All endpoints are served by the local gateway (`v1_local/gateway.py`) on port **8000**.
 
@@ -341,7 +341,7 @@ Deployed on Render. Notifies the owner by email that a developer is waiting for 
 
 ---
 
-## 🐍 Developer Guide — Using the SDK
+## Developer Guide — Using the SDK
 
 ### Installation
 
@@ -419,7 +419,7 @@ If the key has expired, the server returns `401 Unauthorized`. Simply call `clie
 
 ---
 
-## ☁️ v2 — Google Colab Variant
+## v2 — Google Colab Variant
 
 The `v2_colab/` directory contains an experimental gateway designed to run on a **Google Colab** GPU (free T4) instead of a local machine.
 
@@ -432,7 +432,7 @@ The `v2_colab/` directory contains an experimental gateway designed to run on a 
 
 ---
 
-## 🧪 Running Tests
+## Running Tests
 
 Tests live in the `test/` directory. Most require the local gateway and/or Ollama to be running.
 
@@ -457,7 +457,7 @@ python test/test_email.py
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions, issues, and feature requests are welcome!
 
@@ -470,7 +470,7 @@ Please follow the existing code style (PEP 8, type hints where used).
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
